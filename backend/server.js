@@ -9,6 +9,8 @@ mongoose
   .then(() => console.log("MongoDB Connected"))
   .catch(err => console.log(err));
 
+app.use(express.json());
+
 app.post("/quizzes", async (req, res) => {
   try {
     const quiz = new Quiz(req.body);
@@ -19,7 +21,6 @@ app.post("/quizzes", async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
-app.use(express.json());
 
 app.get("/", (req, res) => {
   res.send("LiveQuiz Server is Working");
