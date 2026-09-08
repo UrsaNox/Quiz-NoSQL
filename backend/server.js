@@ -22,6 +22,11 @@ app.post("/quizzes", async (req, res) => {
   }
 });
 
+app.get("/quizzes", async (req, res) => {
+  const quizzes = await Quiz.find();
+  res.json(quizzes);
+});
+
 app.get("/", (req, res) => {
   res.send("LiveQuiz Server is Working");
 });
