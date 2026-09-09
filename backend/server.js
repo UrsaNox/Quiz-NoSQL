@@ -29,9 +29,15 @@ redisClient
   .connect()
   .then(() => console.log("Redis Connected"))
   .catch(err => console.log(err));
-
+  
 io.on("connection", (socket) => {
   console.log("A user connected");
+
+  socket.on("join-room", (roomCode) => {
+    socket.join(roomCode);
+
+    console.log(`User joined room: ${roomCode}`);
+  });
 
   socket.on("test-message", (message) => {
     console.log("Received:", message);
@@ -71,6 +77,64 @@ app.get("/leaderboard/test", async (req, res) => {
   );
 
   res.json(leaderboard);
+});
+
+app.get("/score/test", (req, res) => {
+  const basePoints = 500;
+  const remainingTime = 8;
+  const totalTime = 10;
+
+  const speedBonus = Math.round(
+    500 * remainingTime / totalTime
+  );
+
+  const score = basePoints + speedBonus;
+
+  res.json({
+    basePoints,
+    remainingTime,
+    totalTime,
+    speedBonus,
+    score
+  });
+});
+
+app.get("/score/redis-test", async (req, res) => {
+  const roomCode = "ABC123";
+  const studentId = "Mahir";
+
+  await redisClient.zIncrBy(
+    `room:${roomCode}:leaderboard`,
+    900,
+    studentId
+  );
+
+  const leaderboard = await redisClient.zRangeWithScores(
+    `room:${roomCode}:leaderboard`,
+    0,
+    9,
+    { REV: true }
+  );
+
+  res.json(leaderboard);
+});
+
+app.get("/leaderboard/live-test", async (req, res) => {
+  const roomCode = "ABC123";
+
+  const leaderboard = await redisClient.zRangeWithScores(
+    `room:${roomCode}:leaderboard`,
+    0,
+    9,
+    { REV: true }
+  );
+
+  io.to(roomCode).emit("leaderboardUpdated", leaderboard);
+
+  res.json({
+    message: "Leaderboard sent",
+    leaderboard
+  });
 });
 /*till here*/
 
