@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Socket Test</title>
+</head>
+
+<body>
+
+  <h1>Socket.IO Test</h1>
+
+  <button id="sendButton">
+    Send Message
+  </button>
+
+  <h2>Leaderboard</h2>
+
+  <div id="leaderboard">
+    Waiting for leaderboard...
+  </div>
+
+  <script src="http://localhost:5000/socket.io/socket.io.js"></script>
+
+  <script>
+    const socket = io("http://localhost:5000");
+
+    socket.on("connect", () => {
+      console.log("Connected to server");
+
+      socket.emit("join-room", "ABC123");
+    });
+
+    socket.on("test-message", (message) => {
+      console.log("Received from server:", message);
+    });
+
+    socket.on("leaderboardUpdated", (leaderboard) => {
+      console.log("Leaderboard received:", leaderboard);
+
+      const leaderboardDiv = document.getElementById("leaderboard");
+
+      leaderboardDiv.innerHTML = "";
+
+      leaderboard.forEach((student, index) => {
+        const row = document.createElement("p");
+
+        row.textContent =
+          `${index + 1}. ${student.value} - ${student.score} points`;
+
+        leaderboardDiv.appendChild(row);
+      });
+    });
+
+    document.getElementById("sendButton").addEventListener("click", () => {
+      socket.emit("test-message", "Hello from browser!");
+    });
+  </script>
+
+</body>
+</html>
