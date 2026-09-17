@@ -116,7 +116,12 @@ app.get("/score/redis-test", async (req, res) => {
     { REV: true }
   );
 
-  res.json(leaderboard);
+  io.to(roomCode).emit("leaderboardUpdated", leaderboard);
+
+  res.json({
+    message: "Leaderboard sent",
+    leaderboard
+  });
 });
 
 app.get("/leaderboard/live-test", async (req, res) => {
